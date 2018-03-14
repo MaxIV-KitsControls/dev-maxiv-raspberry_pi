@@ -10,6 +10,7 @@ Sundberg, KITS @ MAXIV 2018-03-06
 import time
 import numpy
 import socket
+from resource import catch_connection_error
 
 from tango import (Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel, DevState,
                     DebugIt)
@@ -27,7 +28,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_3 voltage",
                         fget="get_pin3_voltage",
                         fset="set_pin3_voltage",
-                        fisallowed="is_voltage_allowed")
+                        fisallowed="is_voltage_allowed",
+                        polling_period=1000)
 
     pin3_output = attribute(label="PIN_3 output", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -35,7 +37,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_3 output",
                         fget="get_pin3_output",
                         fset="set_pin3_output",
-                        fisallowed="is_output_allowed")
+                        fisallowed="is_output_allowed",
+                        polling_period=1000)
 
     pin5_voltage = attribute(label="PIN_5 voltage", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -43,7 +46,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_5 voltage",
                         fget="get_pin5_voltage",
                         fset="set_pin5_voltage",
-                        fisallowed="is_voltage_allowed")
+                        fisallowed="is_voltage_allowed",
+                        polling_period=1000)
 
     pin5_output = attribute(label="PIN_5 output", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -51,7 +55,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_5 output",
                         fget="get_pin5_output",
                         fset="set_pin5_output",
-                        fisallowed="is_output_allowed")
+                        fisallowed="is_output_allowed",
+                        polling_period=1000)
 
     pin7_voltage = attribute(label="PIN_7 voltage", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -59,7 +64,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_7 voltage",
                         fget="get_pin7_voltage",
                         fset="set_pin7_voltage",
-                        fisallowed="is_voltage_allowed")
+                        fisallowed="is_voltage_allowed",
+                        polling_period=1000)
 
     pin7_output = attribute(label="PIN_7 output", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -67,7 +73,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_7 output",
                         fget="get_pin7_output",
                         fset="set_pin7_output",
-                        fisallowed="is_output_allowed")
+                        fisallowed="is_output_allowed",
+                        polling_period=1000)
 
     pin8_voltage = attribute(label="PIN_8 voltage", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -75,7 +82,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_8 voltage",
                         fget="get_pin8_voltage",
                         fset="set_pin8_voltage",
-                        fisallowed="is_voltage_allowed")
+                        fisallowed="is_voltage_allowed",
+                        polling_period=1000)
 
     pin8_output = attribute(label="PIN_8 output", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -83,7 +91,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_8 output",
                         fget="get_pin8_output",
                         fset="set_pin8_output",
-                        fisallowed="is_output_allowed")
+                        fisallowed="is_output_allowed",
+                        polling_period=1000)
 
     pin10_voltage = attribute(label="PIN_10 voltage", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -91,7 +100,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_10 voltage",
                         fget="get_pin10_voltage",
                         fset="set_pin10_voltage",
-                        fisallowed="is_voltage_allowed")
+                        fisallowed="is_voltage_allowed",
+                        polling_period=1000)
 
     pin10_output = attribute(label="PIN_10 output", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -99,7 +109,8 @@ class RaspberryPiIO(Device):
                         doc="PIN_10 output",
                         fget="get_pin10_output",
                         fset="set_pin10_output",
-                        fisallowed="is_output_allowed")
+                        fisallowed="is_output_allowed",
+                        polling_period=1000)
 
 
     info = pipe(label='Info')
@@ -120,6 +131,8 @@ class RaspberryPiIO(Device):
     def init_device(self):
         Device.init_device(self)
         self.raspberry = Raspberry(self.host)
+        #event flags
+        self.set_change_event('pin3_voltage', True, True)
         try:
             self.raspberry.connect_to_pi()
             self.set_state(DevState.ON)
@@ -134,66 +147,43 @@ class RaspberryPiIO(Device):
         self.raspberry = None
 
     #gpio3
+    @catch_connection_error
     def get_pin3_voltage(self):
-        try:
-            self.__pin3_voltage = self.raspberry.readvoltage(3)
-            return self.__pin3_voltage
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin3_voltage = self.raspberry.readvoltage(3)
+        return self.__pin3_voltage
 
+    @catch_connection_error
     def set_pin3_voltage(self, value):
-        try:
-            self.raspberry.setvoltage(3, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setvoltage(3, value)
+        self.push_change_event('pin3_voltage', self.get_pin3_voltage())
 
+    @catch_connection_error
     def get_pin3_output(self):
-        try:
-            self.__pin3_output = self.raspberry.readoutput(3)
-            return self.__pin3_output
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin3_output = self.raspberry.readoutput(3)
+        return self.__pin3_output
 
+    @catch_connection_error
     def set_pin3_output(self, value):
-        try:
-            self.raspberry.setoutput(3, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setoutput(3, value)
 
     #gpio5
+    @catch_connection_error
     def get_pin5_voltage(self):
-        try:
-            self.__pin5_voltage = self.raspberry.readvoltage(5)
-            return self.__pin5_voltage
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin5_voltage = self.raspberry.readvoltage(5)
+        return self.__pin5_voltage
 
+    @catch_connection_error
     def set_pin5_voltage(self, value):
-        try:
-            self.raspberry.setvoltage(5, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
-
+        self.raspberry.setvoltage(5, value)
+            
+    @catch_connection_error
     def get_pin5_output(self):
-        try:
-            self.__pin5_output = self.raspberry.readoutput(5)
-            return self.__pin5_output
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
-
+        self.__pin5_output = self.raspberry.readoutput(5)
+        return self.__pin5_output
+            
+    @catch_connection_error
     def set_pin5_output(self, value):
-        try:
-            self.raspberry.setoutput(5, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setoutput(5, value)
 
     #gpio7
     def get_pin7_voltage(self):
@@ -325,6 +315,9 @@ class RaspberryPiIO(Device):
     @command
     def ResetAll(self):
         self.raspberry.resetall()
+        
+
+        
 
 if __name__ == "__main__":
     RaspberryPiIO.run_server()
