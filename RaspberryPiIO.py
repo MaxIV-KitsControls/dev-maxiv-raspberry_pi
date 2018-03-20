@@ -133,6 +133,15 @@ class RaspberryPiIO(Device):
         self.raspberry = Raspberry(self.host)
         #event flags
         self.set_change_event('pin3_voltage', True, True)
+        self.set_change_event('pin5_voltage', True, True)
+        self.set_change_event('pin7_voltage', True, True)
+        self.set_change_event('pin8_voltage', True, True)
+        self.set_change_event('pin10_voltage', True, True)
+        self.set_change_event('pin3_output', True, True)
+        self.set_change_event('pin5_output', True, True)
+        self.set_change_event('pin7_output', True, True)
+        self.set_change_event('pin8_output', True, True)
+        self.set_change_event('pin10_output', True, True)
         try:
             self.raspberry.connect_to_pi()
             self.set_state(DevState.ON)
@@ -165,6 +174,7 @@ class RaspberryPiIO(Device):
     @catch_connection_error
     def set_pin3_output(self, value):
         self.raspberry.setoutput(3, value)
+        self.push_change_event('pin3_output', self.get_pin3_output())
 
     #gpio5
     @catch_connection_error
@@ -175,6 +185,7 @@ class RaspberryPiIO(Device):
     @catch_connection_error
     def set_pin5_voltage(self, value):
         self.raspberry.setvoltage(5, value)
+        self.push_change_event('pin5_voltage', self.get_pin5_voltage())
             
     @catch_connection_error
     def get_pin5_output(self):
@@ -184,101 +195,72 @@ class RaspberryPiIO(Device):
     @catch_connection_error
     def set_pin5_output(self, value):
         self.raspberry.setoutput(5, value)
+        self.push_change_event('pin5_output', self.get_pin5_output())
 
     #gpio7
+    @catch_connection_error
     def get_pin7_voltage(self):
-        try:
-            self.__pin7_voltage = self.raspberry.readvoltage(7)
-            return self.__pin7_voltage
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin7_voltage = self.raspberry.readvoltage(7)
+        return self.__pin7_voltage
 
+    @catch_connection_error
     def set_pin7_voltage(self, value):
-        try:
-            self.raspberry.setvoltage(7, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setvoltage(7, value)
+        self.push_change_event('pin7_voltage', self.get_pin7_voltage())
 
+    @catch_connection_error
     def get_pin7_output(self):
-        try:
-            self.__pin7_output = self.raspberry.readoutput(7)
-            return self.__pin7_output
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin7_output = self.raspberry.readoutput(7)
+        return self.__pin7_output
 
+    @catch_connection_error
     def set_pin7_output(self, value):
-        try:
-            self.__pin7_output = value
-            self.raspberry.setoutput(7, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setoutput(7, value)
+        self.push_change_event('pin7_output', self.get_pin7_output())
 
     #gpio8
+    @catch_connection_error
     def get_pin8_voltage(self):
-        try:
-            self.__pin8_voltage = self.raspberry.readvoltage(8)
-            return self.__pin8_voltage
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin8_voltage = self.raspberry.readvoltage(8)
+        return self.__pin8_voltage
 
+    @catch_connection_error
     def set_pin8_voltage(self, value):
-        try:
-            self.raspberry.setvoltage(8, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setvoltage(8, value)
+        self.push_change_event('pin8_voltage', self.get_pin8_voltage())
 
+    @catch_connection_error
     def get_pin8_output(self):
-        try:
-            self.__pin8_output = self.raspberry.readoutput(8)
-            return self.__pin8_output
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin8_output = self.raspberry.readoutput(8)
+        return self.__pin8_output
 
+    @catch_connection_error
     def set_pin8_output(self, value):
-        try:
-            self.raspberry.setoutput(8, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
-
+        self.raspberry.setoutput(8, value)
+        self.push_change_event('pin8_output', self.get_pin8_output())
 
     #gpio10
+    @catch_connection_error
     def get_pin10_voltage(self):
-        try:
-            self.__pin10_voltage = self.raspberry.readvoltage(10)
-            return self.__pin10_voltage
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin10_voltage = self.raspberry.readvoltage(10)
+        return self.__pin10_voltage
 
+    @catch_connection_error
     def set_pin10_voltage(self, value):
-        try:
-            self.raspberry.setvoltage(10, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setvoltage(10, value)
+        self.push_change_event('pin10_voltage', 
+            self.get_pin10_voltage())
 
+    @catch_connection_error
     def get_pin10_output(self):
-        try:
-            self.__pin10_output = self.raspberry.readoutput(10)
-            return self.__pin10_output
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.__pin10_output = self.raspberry.readoutput(10)
+        return self.__pin10_output
 
+    @catch_connection_error
     def set_pin10_output(self, value):
-        try:
-            self.raspberry.setoutput(10, value)
-        except (BrokenPipeError, ConnectionRefusedError,
-                socket.timeout) as connectionerror:
-            self.set_state(DevState.FAULT)
+        self.raspberry.setoutput(10, value)
+        self.push_change_event('pin10_output', self.get_pin10_output())
+
 #end_of_gpio's
 
     def read_info(self):
@@ -315,8 +297,6 @@ class RaspberryPiIO(Device):
     @command
     def ResetAll(self):
         self.raspberry.resetall()
-        
-
         
 
 if __name__ == "__main__":
