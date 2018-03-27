@@ -111,8 +111,7 @@ class RaspberryPiIO(Device):
                         fset="set_pin10_output",
                         fisallowed="is_output_allowed",
                         polling_period=1000)
-
-
+                        
     info = pipe(label='Info')
 
     host = device_property(dtype=str)
@@ -127,10 +126,11 @@ class RaspberryPiIO(Device):
 
     def is_output_allowed(self, request):
         return self.get_state() == DevState.ON
-
+    
     def init_device(self):
         Device.init_device(self)
         self.raspberry = Raspberry(self.host)
+        
         #event flags
         self.set_change_event('pin3_voltage', True, True)
         self.set_change_event('pin5_voltage', True, True)
@@ -142,6 +142,9 @@ class RaspberryPiIO(Device):
         self.set_change_event('pin7_output', True, True)
         self.set_change_event('pin8_output', True, True)
         self.set_change_event('pin10_output', True, True)
+        
+        #No error decorator for the init function,
+        #the raised ValueError causes the DS to not start
         try:
             self.raspberry.connect_to_pi()
             self.set_state(DevState.ON)
@@ -271,18 +274,6 @@ class RaspberryPiIO(Device):
 #    @DebugIt()
 #    def xxx(self):
 
-
-    def is_TurnOn_allowed(self):
-        return self.get_state() == DevState.OFF
-
-    @command
-    def TurnOn(self):
-#        if self.get_state() != DevState.OFF:
-#            self.debug_stream('Device must be in OFF state to ' +
-#                                'turn on.')
-#            return
-        self.set_state(DevState.ON)
-
     def is_TurnOff_allowed(self):
         return self.get_state() == DevState.ON
 
@@ -297,6 +288,14 @@ class RaspberryPiIO(Device):
     @command
     def ResetAll(self):
         self.raspberry.resetall()
+        
+    @command
+    def Camera_On(self):
+        self.raspberry.camera_on()
+    
+    @command    
+    def Camera_Off(self):
+        self.raspberry.camera_off()
         
 
 if __name__ == "__main__":
