@@ -61,7 +61,7 @@ class Raspberry:
         self.sock.sendall((data).encode())
         
     def resetall(self):
-        data = 'ALL RESETALL'
+        data = 'ALL RESET'
         print(data)
         self.sock.sendall((data).encode())
         

@@ -10,14 +10,16 @@ Sundberg, KITS @ MAXIV 2018-03-06
 import time
 import numpy
 import socket
-from .resource import catch_connection_error
+#from .resource import catch_connection_error
+from resource import catch_connection_error
 
 from tango import (Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel, DevState,
                     DebugIt)
 from tango.server import (Device, attribute, command, pipe,
                     device_property)
 
-from .RPi import Raspberry
+#from .RPi import Raspberry
+from RPi import Raspberry
 
 class RaspberryPiIO(Device):
 
