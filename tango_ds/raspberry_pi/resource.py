@@ -1,3 +1,9 @@
+"""
+Error decorator for the Raspberry Pi Tango Device Server.
+2018-04-03.
+"""
+
+
 import socket
 from functools import wraps
 from PyTango import DevState

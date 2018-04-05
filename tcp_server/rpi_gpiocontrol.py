@@ -1,8 +1,9 @@
 """
-TCP Server for the tango-device RPi GPIO
-Sundberg, KITS @ MAXIV, 2018-03-06
+TCP Server for the RPi GPIO tango device server.
+2018-04-03.
 """
 
+import socket
 import socketserver
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
@@ -12,78 +13,96 @@ class TCP(socketserver.BaseRequestHandler):
     
 
     def handle(self):
+        self.request.settimeout(5)
         print("Client connection: {}".format(self.client_address[0]))
         while True:
-            data = self.request.recv(1024).strip()
-            if not data:
+            try:
+                data = self.request.recv(1024).strip()
+                if not data:
+                    break
+                print("{} wrote:".format(self.client_address[0]))
+                data = str(data).replace("'", "")
+                data = data.replace("b", "")
+                data = data.strip()
+                print(data)
+                self.gpio_action(data)
+            except socket.timeout:
                 break
-            print("{} wrote:".format(self.client_address[0]))
-            data = str(data).replace("'", "")
-            data = data.replace("b", "")
-            data = data.strip()
-            print(data)
-            self.gpio_action(data)
         print("Client disconnected: {}".format(self.client_address[0]))
 
     def gpio_action(self, data):
         pinlist = [3, 5, 7, 8, 10]
         actionlist = data.split()
+        pin = actionlist[0]
+        action = actionlist[1]
+        if len(actionlist)>2:
+            setvalue = actionlist[2]
         
         #gpio action
-        if len(actionlist) < 2:
-            print('fail')
-            return
-        if actionlist[1] == 'SETVOLTAGE':
-            if GPIO.gpio_function(int(actionlist[0])) == 0:
-                if actionlist[2] == 'True':
-                    GPIO.output(int(actionlist[0]), GPIO.HIGH)
-                elif actionlist[2] == 'False':
-                    GPIO.output(int(actionlist[0]), GPIO.LOW)
-            elif GPIO.gpio_function(int(actionlist[0])) == 1:
-                if actionlist[2] == 'True':
-                    GPIO.setup(int(actionlist[0]), GPIO.IN,
+        
+        #setvoltage
+        if action == 'SETVOLTAGE':
+            if GPIO.gpio_function(int(pin)) == 0:
+                if setvalue == 'True':
+                    GPIO.output(int(pin), GPIO.HIGH)
+                elif setvalue == 'False':
+                    GPIO.output(int(pin), GPIO.LOW)
+            elif GPIO.gpio_function(int(pin)) == 1:
+                if setvalue == 'True':
+                    GPIO.setup(int(pin), GPIO.IN,
                                 pull_up_down=GPIO.PUD_UP)
-                elif actionlist[2] == 'False':
-                    GPIO.setup(int(actionlist[0]), GPIO.IN,
+                elif setvalue == 'False':
+                    GPIO.setup(int(pin), GPIO.IN,
                                 pull_up_down=GPIO.PUD_DOWN)
-                            
-        elif actionlist[1] == 'SETOUTPUT':
-            if actionlist[2] == 'True':
-                GPIO.setup(int(actionlist[0]), GPIO.OUT, 
+        
+        #setoutput
+        elif action == 'SETOUTPUT':
+            if setvalue == 'True':
+                GPIO.setup(int(pin), GPIO.OUT, 
                             initial=GPIO.LOW)
-            elif actionlist[2] == 'False':
-                GPIO.setup(int(actionlist[0]), GPIO.IN,
+            elif setvalue == 'False':
+                GPIO.setup(int(pin), GPIO.IN,
                              pull_up_down=GPIO.PUD_DOWN)
-                            
-        elif actionlist[1] == 'RESETALL':
-            GPIO.cleanup( pinlist )
-            
-        elif actionlist[1] == 'OFF':
-            for pin in pinlist:
-                if GPIO.gpio_function(pin) == 0:
-                    GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
-                elif GPIO.gpio_function(pin) == 1:
-                    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-                
-        elif actionlist[1] == 'READVOLTAGE':
+        
+        #reset
+        elif action == 'RESET':
+            if pin == 'ALL':
+                GPIO.cleanup( pinlist )
+        
+        #off
+        elif action == 'OFF':
+            for pinnumber in pinlist:
+                if GPIO.gpio_function(pinnumber) == 0:
+                    GPIO.setup(pinnumber, GPIO.OUT, initial=GPIO.LOW)
+                elif GPIO.gpio_function(pinnumber) == 1:
+                    GPIO.setup(pinnumber, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        
+        #readvoltage
+        elif action == 'READVOLTAGE':
             try:
-                mode = GPIO.input(int(actionlist[0]))
-                if mode == 1:
+                if GPIO.input(int(pin)) == 1:
                     boolstr = 'True'
-                elif mode == 0:
+                elif GPIO.input(int(pin)) == 0:
                     boolstr = 'False'
                 self.request.sendall((boolstr).encode())
-            except:
+            except RuntimeError:
                 boolstr = 'None'
                 self.request.sendall((boolstr).encode())
-                
-        elif actionlist[1] == 'READOUTPUT':
-            mode = GPIO.gpio_function(int(actionlist[0]))
-            if mode == 0:
+        
+        #readoutput
+        elif action == 'READOUTPUT':
+            if GPIO.gpio_function(int(pin)) == 0:
                 boolstr = 'True'
-            elif mode == 1:
+            elif GPIO.gpio_function(int(pin)) == 1:
                 boolstr = 'False'
             self.request.sendall((boolstr).encode())
+        
+        #camera (not implemented yet)
+        elif action == 'CAMERA':
+            if setvalue == 'ON':
+                pass
+            elif setvalue == 'OFF':
+                pass
 
 if __name__ == "__main__":
     HOST, PORT = "0.0.0.0", 9788

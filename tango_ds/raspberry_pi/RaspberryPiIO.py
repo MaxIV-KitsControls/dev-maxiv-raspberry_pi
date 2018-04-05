@@ -2,24 +2,23 @@
 # -*- coding: utf-8 -*-
 
 """
-Raspberry Pi GPIO-control tango device server.
-Sundberg, KITS @ MAXIV 2018-03-06
+Raspberry Pi GPIO-control Tango device server.
+2018-04-03.
 """
-
+ 
 
 import time
 import numpy
 import socket
-#from .resource import catch_connection_error
-from resource import catch_connection_error
 
-from tango import (Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel, DevState,
-                    DebugIt)
-from tango.server import (Device, attribute, command, pipe,
-                    device_property)
+from raspberry_pi.resource import catch_connection_error
 
-#from .RPi import Raspberry
-from RPi import Raspberry
+from tango import (Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel,
+			DevState, DebugIt)
+from tango.server import (Device, attribute, command, pipe, device_property)
+
+from raspberry_pi.RPi import Raspberry
+
 
 class RaspberryPiIO(Device):
 
@@ -119,7 +118,7 @@ class RaspberryPiIO(Device):
     host = device_property(dtype=str)
     port = device_property(dtype=int, default_value=9788)
 
-    #READ and WRITE states currently have the same condition
+    #Read and write states currently have the same condition
     def is_voltage_allowed(self, request):
         if request == AttReqType.READ_REQ:
             return (self.get_state() == DevState.ON)
@@ -133,7 +132,7 @@ class RaspberryPiIO(Device):
         Device.init_device(self)
         self.raspberry = Raspberry(self.host)
         
-        #event flags
+        #Event flags
         self.set_change_event('pin3_voltage', True, True)
         self.set_change_event('pin5_voltage', True, True)
         self.set_change_event('pin7_voltage', True, True)
@@ -145,8 +144,7 @@ class RaspberryPiIO(Device):
         self.set_change_event('pin8_output', True, True)
         self.set_change_event('pin10_output', True, True)
         
-        #No error decorator for the init function,
-        #the raised ValueError causes the DS to not start
+        #No error decorator for the init function
         try:
             self.raspberry.connect_to_pi()
             self.set_state(DevState.ON)
@@ -266,7 +264,7 @@ class RaspberryPiIO(Device):
         self.raspberry.setoutput(10, value)
         self.push_change_event('pin10_output', self.get_pin10_output())
 
-#end_of_gpio's
+#End of gpio's
 
     def read_info(self):
         return 'Information', dict(manufacturer='Raspberry',
@@ -299,7 +297,7 @@ class RaspberryPiIO(Device):
     def Camera_Off(self):
         self.raspberry.camera_off()
         
-run = RaspberryPiIO.run_server
+run = RaspberryPiIO.run_server()
 
 if __name__ == "__main__":
     RaspberryPiIO.run_server()

@@ -1,8 +1,7 @@
 """
-Class for the Raspberry Pi Tango device GPIO control
-Sends encoded string to Raspberry Pi TCP/IP server
-Class has no Tango dependence
-Sundberg, 2018-03-06
+Class for the Raspberry Pi Tango device server GPIO control.
+Class has no Tango dependence.
+2018-04-03.
 """
 
 
@@ -74,12 +73,12 @@ class Raspberry:
         self.sock.close()
         
     def camera_on(self):
-        data = 'ON CAMERA'
+        data = 'NA CAMERA ON'
         print(data)
         self.sock.sendall((data).encode())
         
     def camera_off(self):
-        data = 'OFF CAMERA'
+        data = 'NA CAMERA OFF'
         print(data)
         self.sock.sendall((data).encode())
 
