@@ -13,12 +13,11 @@ import socket
 
 from raspberry_pi.resource import catch_connection_error
 
-from tango import (Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel,
-			DevState, DebugIt)
-from tango.server import (Device, attribute, command, pipe, device_property)
+from tango import Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel
+from tango import DevState, DebugIt
+from tango.server import Device, attribute, command, pipe, device_property
 
 from raspberry_pi.RPi import Raspberry
-
 
 class RaspberryPiIO(Device):
 
@@ -113,7 +112,6 @@ class RaspberryPiIO(Device):
                         fisallowed="is_output_allowed",
                         polling_period=1000)
                         
-    info = pipe(label='Info')
 
     host = device_property(dtype=str)
     port = device_property(dtype=int, default_value=9788)
@@ -266,13 +264,7 @@ class RaspberryPiIO(Device):
 
 #End of gpio's
 
-    def read_info(self):
-        return 'Information', dict(manufacturer='Raspberry',
-                                   model='Pi 3',
-                                   version_number=3)
-
-#    @DebugIt()
-#    def xxx(self):
+#   @DebugIt()
 
     def is_TurnOff_allowed(self):
         return self.get_state() == DevState.ON
@@ -297,7 +289,7 @@ class RaspberryPiIO(Device):
     def Camera_Off(self):
         self.raspberry.camera_off()
         
-run = RaspberryPiIO.run_server()
+run = RaspberryPiIO.run_server
 
 if __name__ == "__main__":
     RaspberryPiIO.run_server()

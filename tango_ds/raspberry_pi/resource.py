@@ -18,7 +18,7 @@ def catch_connection_error(func):
         except (BrokenPipeError, ConnectionRefusedError,
                 socket.timeout) as connectionerror:
             self.set_state(DevState.FAULT)
-            self.debug_stream('Unable to connect to Raspberry Pi TCP/IP'
-                                + ' server.')
+#            self.debug_stream('Unable to connect to Raspberry Pi TCP/IP'
+#                                + ' server.')
             raise ValueError("Connection error")
     return wrapper
