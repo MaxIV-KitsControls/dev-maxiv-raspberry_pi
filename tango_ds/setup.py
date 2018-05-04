@@ -13,9 +13,8 @@ setup(name="tangods-raspberry_pi",
       license="GPLv3",
       description="Tango device server for the Raspberry Pi.",
 
-      author="J. Sundberg", author_email="jens.sundberg@maxiv.lu.se",
+      author="J. Sundberg, Antoine Dupre, Juliano Murari",
+      author_email="jens.sundberg@maxiv.lu.se, antoine.dupre@maxiv.lu.se, juliano.murari@maxiv.lu.se",
       url="http://www.maxiv.lu.se",
       install_requires=['setuptools', 'pytango>=9.2.1'],
-      tests_require=['pytest', 'pytest-xdist'],
-      setup_requires=['pytest-runner']
       )

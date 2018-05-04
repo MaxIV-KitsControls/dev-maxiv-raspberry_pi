@@ -9,8 +9,8 @@ import socket
 import sys
 
 class Raspberry:
-    
-    
+   
+ 
     def __init__(self, host):
         self.host = host
         self.port = 9788
@@ -29,44 +29,35 @@ class Raspberry:
         else:
             return None
         
-    def readvoltage(self, pin):
-        data = str(pin) + ' READVOLTAGE'
-        print(data)
-        self.sock.sendall((data).encode())
-        val = self.sock.recv(1024)
-        val = str(val).replace("b","")
-        val = str(val).replace("'","")
+    def query(self, cmd):
+        self.sock.sendall((cmd).encode())
+        val = str(self.sock.recv(1024))
+        val = val.replace("'","").replace("b","")
         bol = self.str_to_bool(val)
         return bol
         
+    def readvoltage(self, pin):
+        cmd = str(pin) + ' READVOLTAGE'
+        return self.query(cmd)
+
+    def readoutput(self, pin):
+        cmd = str(pin) + ' READOUTPUT'
+        return self.query(cmd)
+       
     def setvoltage(self, pin, value):
         data = str(pin) + ' SETVOLTAGE ' + str(value)
-        print(data)
         self.sock.sendall((data).encode())
     
-    def readoutput(self, pin):
-        data = str(pin) + ' READOUTPUT'
-        print(data)
-        self.sock.sendall((data).encode())
-        val = self.sock.recv(1024)
-        val = str(val).replace("b","")
-        val = str(val).replace("'","")
-        bol = self.str_to_bool(val)
-        return bol
-        
     def setoutput(self, pin, value):
         data = str(pin) + ' SETOUTPUT ' + str(value)
-        print(data)
         self.sock.sendall((data).encode())
         
     def resetall(self):
         data = 'ALL RESET'
-        print(data)
         self.sock.sendall((data).encode())
         
     def turnoff(self):
         data = 'ALL OFF'
-        print(data)
         self.sock.sendall((data).encode())
         
     def disconnect_from_pi(self):
@@ -74,12 +65,8 @@ class Raspberry:
         
     def camera_on(self):
         data = 'NA CAMERA ON'
-        print(data)
         self.sock.sendall((data).encode())
         
     def camera_off(self):
         data = 'NA CAMERA OFF'
-        print(data)
         self.sock.sendall((data).encode())
-
-

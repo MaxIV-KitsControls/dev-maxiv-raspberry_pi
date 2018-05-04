@@ -7,17 +7,16 @@ Raspberry Pi GPIO-control Tango device server.
 """
  
 
-import time
-import numpy
 import socket
 
 from raspberry_pi.resource import catch_connection_error
 
-from tango import Attr, AttReqType, AttrQuality, AttrWriteType, DispLevel
+from tango import AttReqType, AttrWriteType, DispLevel
 from tango import DevState, DebugIt
 from tango.server import Device, attribute, command, pipe, device_property
 
 from raspberry_pi.RPi import Raspberry
+
 
 class RaspberryPiIO(Device):
 
@@ -113,8 +112,8 @@ class RaspberryPiIO(Device):
                         polling_period=1000)
                         
 
-    host = device_property(dtype=str)
-    port = device_property(dtype=int, default_value=9788)
+    Host = device_property(dtype=str)
+    Port = device_property(dtype=int, default_value=9788)
 
     #Read and write states currently have the same condition
     def is_voltage_allowed(self, request):
@@ -128,7 +127,7 @@ class RaspberryPiIO(Device):
     
     def init_device(self):
         Device.init_device(self)
-        self.raspberry = Raspberry(self.host)
+        self.raspberry = Raspberry(self.Host)
         
         #Event flags
         self.set_change_event('pin3_voltage', True, True)
