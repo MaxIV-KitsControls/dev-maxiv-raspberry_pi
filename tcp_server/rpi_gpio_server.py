@@ -7,7 +7,7 @@ import socket
 import socketserver
 import RPi.GPIO as GPIO
 import argparse
-from picamera import PiCamera 
+import subprocess 
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
@@ -16,7 +16,6 @@ class TCP(socketserver.BaseRequestHandler):
    
     
     pinlist = [3, 5, 7, 8, 10]
-    camera_mod = PiCamera()
 
     def handle(self):
         self.request.settimeout(5)
@@ -37,23 +36,21 @@ class TCP(socketserver.BaseRequestHandler):
         print("Client disconnected: {}".format(self.client_address[0]))
 
     def set_voltage(self, pin, setvalue):
-        if GPIO.gpio_function(int(pin)) == 0:
-            if setvalue == 'True':
+        if setvalue == 'True':
+            try:
                 GPIO.output(int(pin), GPIO.HIGH)
-            elif setvalue == 'False':
+            except RuntimeError:
+                GPIO.setup(int(pin), GPIO.OUT, initial=GPIO.HIGH)
+        else:
+            try:
                 GPIO.output(int(pin), GPIO.LOW)
-        elif GPIO.gpio_function(int(pin)) == 1:
-            if setvalue == 'True':
-                GPIO.setup(int(pin), GPIO.IN,
-                            pull_up_down=GPIO.PUD_UP)
-            elif setvalue == 'False':
-                GPIO.setup(int(pin), GPIO.IN,
-                            pull_up_down=GPIO.PUD_DOWN)
+            except RuntimeError:            
+                GPIO.setup(int(pin), GPIO.OUT, initial=GPIO.LOW)
 
     def set_output(self, pin, setvalue):
         if setvalue == 'True':
             GPIO.setup(int(pin), GPIO.OUT, initial=GPIO.LOW)
-        elif setvalue == 'False':
+        else:
             GPIO.setup(int(pin), GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     def reset(self, pin):
@@ -64,14 +61,14 @@ class TCP(socketserver.BaseRequestHandler):
         for pin in self.pinlist:
             if GPIO.gpio_function(pin) == 0:
                 GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
-            elif GPIO.gpio_function(pin) == 1:
+            else:
                 GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     def read_voltage(self, pin):
         try:
             if GPIO.input(int(pin)) == 1:
                 boolstr = 'True'
-            elif GPIO.input(int(pin)) == 0:
+            else:
                 boolstr = 'False'
             self.request.sendall((boolstr).encode())
         except RuntimeError:
@@ -81,15 +78,9 @@ class TCP(socketserver.BaseRequestHandler):
     def read_output(self, pin):
         if GPIO.gpio_function(int(pin)) == 0:
             boolstr = 'True'
-        elif GPIO.gpio_function(int(pin)) == 1:
+        else:
             boolstr = 'False'
         self.request.sendall((boolstr).encode())
-        
-    def camera(self, setvalue):
-        if setvalue == 'ON':
-            self.camera_mod.start_preview()            
-        elif setvalue == 'OFF':
-            self.camera_mod.stop_preview()
 
     def gpio_action(self, data):
         actionlist = data.split()
@@ -122,10 +113,6 @@ class TCP(socketserver.BaseRequestHandler):
         elif action == 'READOUTPUT':
             self.read_output(pin)
        
-        #camera (not implemented yet)
-        elif action == 'CAMERA':
-            self.camera(setvalue)
-
 def main():
     parser = argparse.ArgumentParser(description='Raspberry PI TCP/IP Server.')
     parser.add_argument('-host', metavar='HOST', type=str,
@@ -134,6 +121,7 @@ def main():
             default=9788, help='host port number (int)')
     args = parser.parse_args()
     HOST, PORT = args.host, args.port 
+    p = subprocess.Popen("python ./advanced_streamer.py 1", shell=True)
     server = socketserver.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c
     server.serve_forever()

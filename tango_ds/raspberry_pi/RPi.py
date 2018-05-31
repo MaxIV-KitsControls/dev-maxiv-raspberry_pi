@@ -62,11 +62,3 @@ class Raspberry:
         
     def disconnect_from_pi(self):
         self.sock.close()
-        
-    def camera_on(self):
-        data = 'NA CAMERA ON'
-        self.sock.sendall((data).encode())
-        
-    def camera_off(self):
-        data = 'NA CAMERA OFF'
-        self.sock.sendall((data).encode())
