@@ -1,27 +1,26 @@
 """
 TCP Server for the RPi GPIO tango device server.
-2018-04-03.
+2018-06-13.
 """
 
 import socket
 import socketserver
 import RPi.GPIO as GPIO
 import argparse
-import subprocess 
+import subprocess
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 
+
 class TCP(socketserver.BaseRequestHandler):
-   
-    
-    pinlist = [3, 5, 7, 8, 10]
+        
+    pinlist = [3, 5, 7, 8, 10, 11, 12, 13, 15, 16]
 
     def handle(self):
-        self.request.settimeout(5)
+        #self.request.settimeout(5)
         print("Client connection: {}".format(self.client_address[0]))
         while True:
-            try:
                 data = self.request.recv(1024).strip()
                 if not data:
                     break
@@ -31,27 +30,33 @@ class TCP(socketserver.BaseRequestHandler):
                 data = data.strip()
                 #print(data)
                 self.gpio_action(data)
-            except socket.timeout:
-                break
         print("Client disconnected: {}".format(self.client_address[0]))
 
     def set_voltage(self, pin, setvalue):
-        if setvalue == 'True':
-            try:
-                GPIO.output(int(pin), GPIO.HIGH)
-            except RuntimeError:
-                GPIO.setup(int(pin), GPIO.OUT, initial=GPIO.HIGH)
+        if GPIO.gpio_function(int(pin)) == 1:
+            boolstr = 'False'
+            self.request.sendall((boolstr).encode()) 
         else:
-            try:
-                GPIO.output(int(pin), GPIO.LOW)
-            except RuntimeError:            
-                GPIO.setup(int(pin), GPIO.OUT, initial=GPIO.LOW)
+            if setvalue == 'True':
+                try:
+                    GPIO.output(int(pin), GPIO.HIGH)
+                except RuntimeError:
+                    set_output(int(pin), 'True')
+                    GPIO.output(int(pin), GPIO.HIGH)
+            else:
+                try:
+                    GPIO.output(int(pin), GPIO.LOW)
+                except RuntimeError:            
+                    set_output(int(pin), 'True')
+                    GPIO.output(int(pin), GPIO.LOW)
+            boolstr = 'True'
+            self.request.sendall((boolstr).encode())
 
     def set_output(self, pin, setvalue):
         if setvalue == 'True':
-            GPIO.setup(int(pin), GPIO.OUT, initial=GPIO.LOW)
+            GPIO.setup(int(pin), GPIO.OUT)
         else:
-            GPIO.setup(int(pin), GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+            GPIO.setup(int(pin), GPIO.IN)
 
     def reset(self, pin):
          if pin == 'ALL':
@@ -112,7 +117,7 @@ class TCP(socketserver.BaseRequestHandler):
         #readoutput
         elif action == 'READOUTPUT':
             self.read_output(pin)
-       
+
 def main():
     parser = argparse.ArgumentParser(description='Raspberry PI TCP/IP Server.')
     parser.add_argument('-host', metavar='HOST', type=str,
@@ -120,7 +125,7 @@ def main():
     parser.add_argument('-port', metavar='PORT', type=int,
             default=9788, help='host port number (int)')
     args = parser.parse_args()
-    HOST, PORT = args.host, args.port 
+    HOST, PORT = args.host, args.port
     p = subprocess.Popen("python ./advanced_streamer.py 1", shell=True)
     server = socketserver.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c

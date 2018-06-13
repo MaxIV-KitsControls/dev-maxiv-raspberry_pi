@@ -45,11 +45,19 @@ class Raspberry:
         return self.query(cmd)
        
     def setvoltage(self, pin, value):
-        data = str(pin) + ' SETVOLTAGE ' + str(value)
-        self.sock.sendall((data).encode())
-    
+        cmd = str(pin) + ' SETVOLTAGE ' + str(value)
+        return self.query(cmd)
+
     def setoutput(self, pin, value):
         data = str(pin) + ' SETOUTPUT ' + str(value)
+        self.sock.sendall((data).encode())
+    
+    def start_motor(self):
+        data = 'X MOTOR True'
+        self.sock.sendall((data).encode())
+
+    def stop_motor(self):
+        data = 'X MOTOR False'
         self.sock.sendall((data).encode())
         
     def resetall(self):
