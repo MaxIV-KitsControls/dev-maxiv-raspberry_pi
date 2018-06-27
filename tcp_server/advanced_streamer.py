@@ -43,10 +43,14 @@ def video():
         event_genertor(Video()),
         mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-if __name__ == '__main__':
+def main():
+    global app
     app.debug = True
     host = "0.0.0.0"
     port = 5000
     server = WSGIServer((host, port), app)
     server.serve_forever()
+
+
+if __name__ == '__main__':
+    main()
