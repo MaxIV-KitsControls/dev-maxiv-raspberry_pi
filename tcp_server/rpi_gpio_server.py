@@ -126,7 +126,7 @@ def main():
             default=9788, help='host port number (int)')
     args = parser.parse_args()
     HOST, PORT = args.host, args.port
-    p = subprocess.Popen("python ./advanced_streamer.py 1", shell=True)
+    p = subprocess.Popen("python -c 'import advanced_streamer; advanced_streamer.main()'", shell=True)
     server = socketserver.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c
     server.serve_forever()
