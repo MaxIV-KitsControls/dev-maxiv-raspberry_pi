@@ -300,7 +300,7 @@ class RaspberryPiIO(Device):
         return self.get_state() == DevState.ON
 
     def set_voltage(self, value, pin, output):
-        if not output:
+        if not output or output is None:
             raise ValueError("Pin must be setup as an output first")
         else:
             request = self.raspberry.setvoltage(pin, value)

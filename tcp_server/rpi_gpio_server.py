@@ -41,13 +41,13 @@ class TCP(socketserver.BaseRequestHandler):
                 try:
                     GPIO.output(int(pin), GPIO.HIGH)
                 except RuntimeError:
-                    set_output(int(pin), 'True')
+                    self.set_output(int(pin), 'True')
                     GPIO.output(int(pin), GPIO.HIGH)
             else:
                 try:
                     GPIO.output(int(pin), GPIO.LOW)
                 except RuntimeError:            
-                    set_output(int(pin), 'True')
+                    self.set_output(int(pin), 'True')
                     GPIO.output(int(pin), GPIO.LOW)
             boolstr = 'True'
             self.request.sendall((boolstr).encode())
