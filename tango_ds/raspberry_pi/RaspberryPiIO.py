@@ -253,11 +253,14 @@ class RaspberryPiIO(Device):
         #No error decorator for the init function
         try:
             self.raspberry.connect_to_pi()
-            url = 'http://' + self.Host + ':5000/stream'        
-            response = requests.get(url, stream=True)
-            
-            self.reader = Reader(response)
-            self.frame = self.get_frame()
+            try:
+                url = 'http://' + self.Host + ':5000/stream'        
+                response = requests.get(url, stream=True)
+                self.reader = Reader(response)
+                self.frame = self.get_frame()
+            except requests.exceptions.ConnectionError:
+                self.debug_stream('Unable to connect to Raspberry Pi HTTP'
+                                + ' server.')
             self.set_state(DevState.ON)
      
         except (BrokenPipeError, ConnectionRefusedError,
