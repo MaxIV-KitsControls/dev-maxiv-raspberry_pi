@@ -124,9 +124,12 @@ def main():
             default='0.0.0.0', help='host ip number (str)')
     parser.add_argument('-port', metavar='PORT', type=int,
             default=9788, help='host port number (int)')
+    parser.add_argument('-camera', metavar='CAMERA', type=str,
+            default='n', help='camera support y/n (str)')
     args = parser.parse_args()
-    HOST, PORT = args.host, args.port
-    p = subprocess.Popen("python -c 'import advanced_streamer; advanced_streamer.main()'", shell=True)
+    HOST, PORT, CAMERA = args.host, args.port, args.camera
+    if CAMERA == 'y':
+        p = subprocess.Popen("python -c 'import advanced_streamer; advanced_streamer.main()'", shell=True)
     server = socketserver.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c
     server.serve_forever()
