@@ -129,7 +129,7 @@ def main():
     args = parser.parse_args()
     HOST, PORT, CAMERA = args.host, args.port, args.camera
     if CAMERA == 'y':
-        p = subprocess.Popen("python ./advanced_streamer.py 1", shell=True)
+        p = subprocess.Popen("python -c 'import advanced_streamer; advanced_streamer.main()'", shell=True)
     server = socketserver.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c
     server.serve_forever()
