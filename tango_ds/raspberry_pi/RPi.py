@@ -6,21 +6,20 @@ Class has no Tango dependence.
 
 
 import socket
-import sys
+
 
 class Raspberry:
-   
- 
+
     def __init__(self, host):
         self.host = host
         self.port = 9788
-        # Create a TCP socket 
+        # Create a TCP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(1)
-        
+
     def connect_to_pi(self):
         self.sock.connect((self.host, self.port))
-                    
+
     def str_to_bool(self, s):
         if s == 'True':
             return True
@@ -28,14 +27,17 @@ class Raspberry:
             return False
         else:
             return None
-        
+
+    def sendall(self, cmd):
+        self.sock.sendall((cmd + ";").encode())
+
     def query(self, cmd):
-        self.sock.sendall((cmd).encode())
+        self.sendall(cmd)
         val = str(self.sock.recv(1024))
-        val = val.replace("'","").replace("b","")
+        val = val.replace("'", "").replace("b", "")
         bol = self.str_to_bool(val)
         return bol
-        
+
     def readvoltage(self, pin):
         cmd = str(pin) + ' READVOLTAGE'
         return self.query(cmd)
@@ -43,30 +45,30 @@ class Raspberry:
     def readoutput(self, pin):
         cmd = str(pin) + ' READOUTPUT'
         return self.query(cmd)
-       
+
     def setvoltage(self, pin, value):
         cmd = str(pin) + ' SETVOLTAGE ' + str(value)
         return self.query(cmd)
 
     def setoutput(self, pin, value):
         data = str(pin) + ' SETOUTPUT ' + str(value)
-        self.sock.sendall((data).encode())
-    
+        self.sendall(data)
+
     def start_motor(self):
         data = 'X MOTOR True'
-        self.sock.sendall((data).encode())
+        self.sendall(data)
 
     def stop_motor(self):
         data = 'X MOTOR False'
-        self.sock.sendall((data).encode())
-        
+        self.sendall(data)
+
     def resetall(self):
         data = 'ALL RESET'
-        self.sock.sendall((data).encode())
-        
+        self.sendall(data)
+
     def turnoff(self):
         data = 'ALL OFF'
-        self.sock.sendall((data).encode())
-        
+        self.sendall(data)
+
     def disconnect_from_pi(self):
         self.sock.close()
