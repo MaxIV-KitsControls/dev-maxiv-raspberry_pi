@@ -28,8 +28,10 @@ class TCP(socketserver.BaseRequestHandler):
                 data = str(data).replace("'", "")
                 data = data.replace("b", "")
                 data = data.strip()
-                #print(data)
-                self.gpio_action(data)
+                data = data.split(";")
+                for d in data:
+                    if d:
+                        self.gpio_action(d)
         print("Client disconnected: {}".format(self.client_address[0]))
 
     def set_voltage(self, pin, setvalue):
