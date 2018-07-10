@@ -14,7 +14,7 @@ GPIO.setwarnings(False)
 
 
 class TCP(socketserver.BaseRequestHandler):
-        
+
     pinlist = [3, 5, 7, 8, 10, 11, 12, 13, 15, 16]
 
     def handle(self):
@@ -35,7 +35,7 @@ class TCP(socketserver.BaseRequestHandler):
     def set_voltage(self, pin, setvalue):
         if GPIO.gpio_function(int(pin)) == 1:
             boolstr = 'False'
-            self.request.sendall((boolstr).encode()) 
+            self.request.sendall((boolstr).encode())
         else:
             if setvalue == 'True':
                 try:
@@ -46,7 +46,7 @@ class TCP(socketserver.BaseRequestHandler):
             else:
                 try:
                     GPIO.output(int(pin), GPIO.LOW)
-                except RuntimeError:            
+                except RuntimeError:
                     self.set_output(int(pin), 'True')
                     GPIO.output(int(pin), GPIO.LOW)
             boolstr = 'True'
@@ -93,11 +93,11 @@ class TCP(socketserver.BaseRequestHandler):
         action = actionlist[1]
         if len(actionlist)>2:
             setvalue = actionlist[2]
-       
+
         #setvoltage
         if action == 'SETVOLTAGE':
             self.set_voltage(pin, setvalue)
-       
+
         #setoutput
         elif action == 'SETOUTPUT':
             self.set_output(pin, setvalue)
@@ -105,15 +105,15 @@ class TCP(socketserver.BaseRequestHandler):
         #reset
         elif action == 'RESET':
             self.reset(pin)
-       
+
         #off
         elif action == 'OFF':
             self.off()
-       
+
         #readvoltage
         elif action == 'READVOLTAGE':
             self.read_voltage(pin)
-       
+
         #readoutput
         elif action == 'READOUTPUT':
             self.read_output(pin)
