@@ -5,7 +5,7 @@
 Raspberry Pi GPIO-control Tango device server.
 KITS 2018-05-31.
 """
- 
+
 
 import socket
 
@@ -57,7 +57,7 @@ class Reader():
 
 
 class RaspberryPiIO(Device):
-   
+
     #attributes
     image = attribute(dtype=((int,),), max_dim_x=2000, max_dim_y=2000)
 
@@ -227,7 +227,7 @@ class RaspberryPiIO(Device):
     def init_device(self):
         Device.init_device(self)
         self.raspberry = Raspberry(self.Host)
- 
+
         #Event flags
         #self.set_change_event('pin3_voltage', True, True)
         #self.set_change_event('pin5_voltage', True, True)
@@ -249,12 +249,12 @@ class RaspberryPiIO(Device):
         #self.set_change_event('pin13_output', True, True)
         #self.set_change_event('pin15_output', True, True)
         #self.set_change_event('pin16_output', True, True)
-        
+
         #No error decorator for the init function
         try:
             self.raspberry.connect_to_pi()
             try:
-                url = 'http://' + self.Host + ':5000/stream'        
+                url = 'http://' + self.Host + ':5000/stream'
                 response = requests.get(url, stream=True)
                 self.reader = Reader(response)
                 self.frame = self.get_frame()
@@ -262,7 +262,7 @@ class RaspberryPiIO(Device):
                 self.debug_stream('Unable to connect to Raspberry Pi HTTP'
                                 + ' server.')
             self.set_state(DevState.ON)
-     
+
         except (BrokenPipeError, ConnectionRefusedError,
                 ConnectionError, socket.timeout) as connectionerror:
             self.set_state(DevState.FAULT)
@@ -306,7 +306,7 @@ class RaspberryPiIO(Device):
             request = self.raspberry.setvoltage(pin, value)
             if not request:
                 raise ValueError("Pin must be setup as an output first")
-                     
+
 
     #gpio3
     @catch_connection_error
@@ -336,12 +336,12 @@ class RaspberryPiIO(Device):
     @catch_connection_error
     def set_pin5_voltage(self, value):
         self.set_voltage(value, 5, self.__pin5_output)
-            
+
     @catch_connection_error
     def get_pin5_output(self):
         self.__pin5_output = self.raspberry.readoutput(5)
         return self.__pin5_output
-            
+
     @catch_connection_error
     def set_pin5_output(self, value):
         self.raspberry.setoutput(5, value)
@@ -373,6 +373,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin8_voltage(self, value):
+        print(self.__pin8_output)
         self.set_voltage(value, 8, self.__pin8_output)
 
     @catch_connection_error
@@ -440,7 +441,7 @@ class RaspberryPiIO(Device):
     @catch_connection_error
     def set_pin12_output(self, value):
         self.raspberry.setoutput(12, value)
- 
+
     #gpio13
     @catch_connection_error
     def get_pin13_voltage(self):
@@ -478,7 +479,7 @@ class RaspberryPiIO(Device):
     @catch_connection_error
     def set_pin15_output(self, value):
         self.raspberry.setoutput(15, value)
- 
+
     #gpio16
     @catch_connection_error
     def get_pin16_voltage(self):

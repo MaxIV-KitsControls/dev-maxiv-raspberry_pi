@@ -15,7 +15,6 @@ class Raspberry:
         self.port = 9788
         # Create a TCP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(1)
 
     def connect_to_pi(self):
         self.sock.connect((self.host, self.port))
@@ -52,14 +51,6 @@ class Raspberry:
 
     def setoutput(self, pin, value):
         data = str(pin) + ' SETOUTPUT ' + str(value)
-        self.sendall(data)
-
-    def start_motor(self):
-        data = 'X MOTOR True'
-        self.sendall(data)
-
-    def stop_motor(self):
-        data = 'X MOTOR False'
         self.sendall(data)
 
     def resetall(self):
