@@ -59,7 +59,8 @@ class Reader():
 class RaspberryPiIO(Device):
 
     #attributes
-    image = attribute(dtype=((int,),), max_dim_x=2000, max_dim_y=2000)
+    image = attribute(dtype=((int,),), max_dim_x=2000, max_dim_y=2000,
+                        fisallowed="is_image_allowed")
 
     pin3_voltage = attribute(label="PIN_3 voltage", dtype=bool,
                         display_level=DispLevel.OPERATOR,
@@ -297,6 +298,9 @@ class RaspberryPiIO(Device):
             return (self.get_state() == DevState.ON)
 
     def is_output_allowed(self, request):
+        return self.get_state() == DevState.ON
+
+    def is_image_allowed(self, request):
         return self.get_state() == DevState.ON
 
     def set_voltage(self, value, pin, output):

@@ -14,8 +14,7 @@ from tango import DevState, DevFailed
 #  - Connection fail
 #  - Connection error decorator
 #  - Commands
-#    - TurnOn
-#    - TurnOn allowed
+#    - Init
 #    - TurnOff
 #    - TurnOff allowed
 #    - ResetAll
@@ -116,8 +115,8 @@ def test_pin_output(scope_device, raspberry_pin):
     # Extract mocks
     ds, tcp, query_map, query_queue = scope_device
     # Expected queries
-    read_query = "{} READOUTPUT".format(raspberry_pin).encode()
-    write_query = "{} SETOUTPUT True".format(raspberry_pin).encode()
+    read_query = "{} READOUTPUT;".format(raspberry_pin).encode()
+    write_query = "{} SETOUTPUT True;".format(raspberry_pin).encode()
     # Generate output
     expected_ouput = bool(random.getrandbits(1))
     # Setup socket mock answer
@@ -141,7 +140,7 @@ def test_pin_voltage(scope_device, raspberry_pin):
     # Extract mocks
     ds, tcp, query_map, query_queue = scope_device
     # Expected query
-    read_query = "{} READVOLTAGE".format(raspberry_pin).encode()
+    read_query = "{} READVOLTAGE;".format(raspberry_pin).encode()
     # Generate output
     expected_output = bool(random.getrandbits(1))
     # Setup socket mock answer
@@ -155,7 +154,7 @@ def test_pin_voltage(scope_device, raspberry_pin):
     # Assert read out
     assert output == expected_output
     # Write query
-    write_query = "{} SETVOLTAGE {}".format(raspberry_pin, expected_output)
+    write_query = "{} SETVOLTAGE {};".format(raspberry_pin, expected_output)
     write_query = write_query.encode()
     # Except exception if the attribute output is not set to true
     with pytest.raises(DevFailed):
@@ -166,3 +165,32 @@ def test_pin_voltage(scope_device, raspberry_pin):
     ds.read_attribute("pin{}_output".format(raspberry_pin))
     ds.write_attribute(attribute_name, expected_output)
     assert write_query in query_map.history
+
+
+def test_turnoff(scope_device):
+    #Extract mocks
+    ds, tcp, query_map, query_queue = scope_device
+    #Expected query
+    command_query = "ALL OFF;".encode()
+    #Test that query_queue is empty
+    assert not query_queue
+    #Test that device is ON
+    assert ds.state() == DevState.ON
+    #Send command
+    ds.TurnOff()
+    #Test that device is turned OFF
+    assert ds.state() == DevState.OFF
+    #Test that command is in query_queue
+    assert command_query in query_queue
+    with pytest.raises(DevFailed) as e:
+        ds.TurnOff()
+    assert "Command TurnOff not allowed when the device is in OFF state" in str(e.value)
+    #Turn device back ON
+    ds.init()
+    #ds.set_state(DevState.ON)
+    assert ds.state() == DevState.ON
+    
+    # Assert query
+    #assert command_query in query_map.history
+    # Assert read out
+    #assert output == expected_output
