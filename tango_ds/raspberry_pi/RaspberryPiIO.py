@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Raspberry Pi GPIO-control Tango device server.
+Raspberry Pi GPIO-control Tango device server and http camera stream.
 KITS 2018-05-31.
 """
 
@@ -21,47 +21,9 @@ from tango.server import Device, attribute, command, pipe, device_property
 from raspberry_pi.RPi import Raspberry
 
 
-class Reader():
-
-    def __init__(self, event_source, char_enc='utf-8'):
-        self._event_source = event_source
-        self._char_enc = char_enc
-
-    def _read(self):
-        data = b''
-        for frame in self._event_source:
-            for line in frame.splitlines(True):
-                data += line
-                if data.endswith(b'\r\n\r\n'):
-                    yield data
-                    data = b''
-        if data:
-            yield data
-        print("Done")
-
-    def events(self):
-        i = 0
-        while True:
-            try:
-                frame = b''
-                for data in self._read():
-                    frame += data
-                    if len(frame) >= 307200:
-                        yield frame
-                        #print("yield frame {}".format(i))
-                        i += 1
-                        frame = b''
-            except Exception as e:
-                print("Exception", e)
-                break
-
-
 class RaspberryPiIO(Device):
 
     #attributes
-    image = attribute(dtype=((int,),), max_dim_x=2000, max_dim_y=2000,
-                        fisallowed="is_image_allowed")
-
     pin3_voltage = attribute(label="PIN_3 voltage", dtype=bool,
                         display_level=DispLevel.OPERATOR,
                         access=AttrWriteType.READ_WRITE,
@@ -254,14 +216,6 @@ class RaspberryPiIO(Device):
         #No error decorator for the init function
         try:
             self.raspberry.connect_to_pi()
-            try:
-                url = 'http://' + self.Host + ':5000/stream'
-                response = requests.get(url, stream=True)
-                self.reader = Reader(response)
-                self.frame = self.get_frame()
-            except requests.exceptions.ConnectionError:
-                self.debug_stream('Unable to connect to Raspberry Pi HTTP'
-                                + ' server.')
             self.set_state(DevState.ON)
 
         except (BrokenPipeError, ConnectionRefusedError,
@@ -269,22 +223,6 @@ class RaspberryPiIO(Device):
             self.set_state(DevState.FAULT)
             self.debug_stream('Unable to connect to Raspberry Pi TCP/IP'
                                 + ' server.')
-
-    def get_frame(self):
-        for event in self.reader.events():
-            try:
-                event = event.strip(b'\r\n\r\n')
-                decoded = np.asarray(bytearray(event), dtype=np.uint8)
-                decoded = decoded.reshape(480, 640)
-                yield decoded
-            except Exception as e:
-#               print("Missing frame")
-#               print(e)
-                pass
-
-    def read_image(self):
-        l = next(self.frame)
-        return l
 
     def delete_device(self):
         self.raspberry.disconnect_from_pi()
@@ -300,9 +238,6 @@ class RaspberryPiIO(Device):
     def is_output_allowed(self, request):
         return self.get_state() == DevState.ON
 
-    def is_image_allowed(self, request):
-        return self.get_state() == DevState.ON
-
     def set_voltage(self, value, pin, output):
         if not output or output is None:
             raise ValueError("Pin must be setup as an output first")
@@ -310,7 +245,6 @@ class RaspberryPiIO(Device):
             request = self.raspberry.setvoltage(pin, value)
             if not request:
                 raise ValueError("Pin must be setup as an output first")
-
 
     #gpio3
     @catch_connection_error

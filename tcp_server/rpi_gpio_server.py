@@ -1,6 +1,6 @@
 """
 TCP Server for the RPi GPIO tango device server.
-2018-06-13.
+2018-10-29.
 """
 
 import socket
@@ -131,7 +131,7 @@ def main():
     args = parser.parse_args()
     HOST, PORT, CAMERA = args.host, args.port, args.camera
     if CAMERA == 'y':
-        p = subprocess.Popen("python -c 'import advanced_streamer; advanced_streamer.main()'", shell=True)
+        p = subprocess.Popen("python -c 'import jpg_streamer; jpg_streamer.main()'", shell=True)
     server = SocketServer.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c
     server.serve_forever()
