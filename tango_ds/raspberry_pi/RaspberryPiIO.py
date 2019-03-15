@@ -254,6 +254,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin3_voltage(self, value):
+        self.get_pin3_output()
         self.set_voltage(value, 3, self.__pin3_output)
 
     @catch_connection_error
@@ -273,6 +274,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin5_voltage(self, value):
+        self.get_pin5_output()
         self.set_voltage(value, 5, self.__pin5_output)
 
     @catch_connection_error
@@ -292,7 +294,8 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin7_voltage(self, value):
-       self.set_voltage(value, 7, self.__pin7_output)
+        self.get_pin7_output()
+        self.set_voltage(value, 7, self.__pin7_output)
 
     @catch_connection_error
     def get_pin7_output(self):
@@ -311,7 +314,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin8_voltage(self, value):
-        print(self.__pin8_output)
+        self.get_pin8_output()
         self.set_voltage(value, 8, self.__pin8_output)
 
     @catch_connection_error
@@ -331,7 +334,8 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin10_voltage(self, value):
-       self.set_voltage(value, 10, self.__pin10_output)
+        self.get_pin10_output()
+        self.set_voltage(value, 10, self.__pin10_output)
 
     @catch_connection_error
     def get_pin10_output(self):
@@ -350,6 +354,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin11_voltage(self, value):
+        self.get_pin11_output()
         self.set_voltage(value, 11, self.__pin11_output)
 
     @catch_connection_error
@@ -369,6 +374,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin12_voltage(self, value):
+        self.get_pin12_output()
         self.set_voltage(value, 12, self.__pin12_output)
 
     @catch_connection_error
@@ -388,6 +394,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin13_voltage(self, value):
+        self.get_pin13_output()
         self.set_voltage(value, 13, self.__pin13_output)
 
     @catch_connection_error
@@ -407,6 +414,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin15_voltage(self, value):
+        self.get_pin15_output()
         self.set_voltage(value, 15, self.__pin15_output)
 
     @catch_connection_error
@@ -426,6 +434,7 @@ class RaspberryPiIO(Device):
 
     @catch_connection_error
     def set_pin16_voltage(self, value):
+        self.get_pin16_output()
         self.set_voltage(value, 16, self.__pin16_output)
 
     @catch_connection_error
