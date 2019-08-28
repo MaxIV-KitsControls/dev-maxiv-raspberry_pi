@@ -5,7 +5,7 @@ from setuptools import setup
 
 # Setup
 setup(name="tangods-raspberry_pi",
-      version="0.1.2",
+      version="0.1.3",
       packages=['raspberry_pi'],
       entry_points={
           'console_scripts': ['RaspberryPiIO = raspberry_pi:run']},

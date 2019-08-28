@@ -219,7 +219,7 @@ class RaspberryPiIO(Device):
             self.set_state(DevState.ON)
 
         except (BrokenPipeError, ConnectionRefusedError,
-                ConnectionError, socket.timeout) as connectionerror:
+                ConnectionError, socket.timeout, TimeoutError) as connectionerror:
             self.set_state(DevState.FAULT)
             self.debug_stream('Unable to connect to Raspberry Pi TCP/IP'
                                 + ' server.')
