@@ -6,7 +6,7 @@ try:
     import cv3 as cv
 except ImportError:
     import cv2 as cv
-from gevent.wsgi import WSGIServer
+from gevent.pypwsgi import WSGIServer
 from gevent.queue import Queue
 import gevent
 from time import time
