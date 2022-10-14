@@ -4,7 +4,10 @@ TCP Server for the RPi GPIO tango device server.
 """
 
 import socket
-import SocketServer
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
 import RPi.GPIO as GPIO
 import argparse
 import subprocess
@@ -13,7 +16,7 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 
 
-class TCP(SocketServer.BaseRequestHandler):
+class TCP(socketserver.BaseRequestHandler):
 
     pinlist = [3, 5, 7, 8, 10, 11, 12, 13, 15, 16]
 
@@ -132,7 +135,7 @@ def main():
     HOST, PORT, CAMERA = args.host, args.port, args.camera
     if CAMERA == 'y':
         p = subprocess.Popen("python -c 'import jpg_streamer; jpg_streamer.main()'", shell=True)
-    server = SocketServer.TCPServer((HOST, PORT), TCP)
+    server = socketserver.TCPServer((HOST, PORT), TCP)
     # interrupt with Ctrl+c
     server.serve_forever()
 
